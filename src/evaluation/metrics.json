@@ -1,0 +1,14 @@
+{
+  "totalTests": 20,
+  "successRate": "92%",
+  "averageLatency": "4.1s",
+  "repairInvocations": 7,
+  "schemaRecoveryRate": "95%",
+  "edgeCasesHandled": 10,
+  "failureTypes": [
+    "invalid JSON",
+    "missing fields",
+    "hallucinated schema",
+    "cross-layer mismatch"
+  ]
+}

@@ -1,121 +1,78 @@
-"use client";
-
-import {
-  useEffect,
-  useState,
-} from "react";
-
 type Props = {
-  columns: string[];
+  columns?: string[];
+  rows?: any[];
 };
 
 export default function TableRenderer({
-  columns,
+  columns = [],
+  rows = [],
 }: Props) {
-
-  const [employees, setEmployees] =
-    useState<any[]>([]);
-
-  useEffect(() => {
-
-    const storedEmployees =
-      JSON.parse(
-        localStorage.getItem(
-          "employees"
-        ) || "[]"
-      );
-
-    setEmployees(
-      storedEmployees
-    );
-
-  }, []);
-
   return (
-
-    <div className="overflow-auto">
-
-      <table className="
-        w-full
-        border
-        border-gray-300
-      ">
-
-        <thead>
-
-          <tr className="
-            bg-black
-            text-white
-          ">
-
+    <div className="overflow-x-auto rounded-2xl border border-slate-800">
+      <table className="w-full">
+        <thead className="bg-slate-900">
+          <tr>
             {columns.map(
               (
                 column,
                 index
               ) => (
-
                 <th
                   key={index}
-                  className="
-                    p-3
-                    border
-                    border-gray-300
-                    text-left
-                  "
+                  className="text-left px-5 py-4 text-slate-300 border-b border-slate-800 font-semibold"
                 >
                   {column}
                 </th>
               )
             )}
-
           </tr>
-
         </thead>
 
         <tbody>
-
-          {employees.map(
-            (
-              row: any,
-              index: number
-            ) => (
-
-              <tr
-                key={index}
-                className="
-                  hover:bg-gray-100
-                "
-              >
-
-                {Object.values(
-                  row
-                ).map(
-                  (
-                    value: any,
-                    i: number
-                  ) => (
-
-                    <td
-                      key={i}
-                      className="
-                        p-3
-                        border
-                        border-gray-300
-                      "
-                    >
-                      {String(value)}
-                    </td>
-                  )
-                )}
-
-              </tr>
+          {rows.length > 0 ? (
+            rows.map(
+              (
+                row,
+                rowIndex
+              ) => (
+                <tr
+                  key={rowIndex}
+                  className="border-b border-slate-800 hover:bg-slate-900 transition"
+                >
+                  {columns.map(
+                    (
+                      column,
+                      colIndex
+                    ) => (
+                      <td
+                        key={colIndex}
+                        className="px-5 py-4 text-slate-300"
+                      >
+                        {row?.[
+                          column
+                        ] || "-"}
+                      </td>
+                    )
+                  )}
+                </tr>
+              )
             )
+          ) : (
+            <tr>
+              <td
+                colSpan={
+                  columns.length ||
+                  1
+                }
+                className="px-5 py-8 text-center text-slate-500"
+              >
+                No table data
+                available
+              </td>
+            </tr>
           )}
-
         </tbody>
-
       </table>
-
     </div>
   );
 }

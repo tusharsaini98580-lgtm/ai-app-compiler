@@ -1,90 +1,58 @@
-export function executeAction(
+export async function executeAction(
   action: string,
   formData: any
 ) {
 
-  console.log(
-    "ACTION:",
-    action
-  );
+  try {
 
-  console.log(
-    "FORM DATA:",
-    formData
-  );
+    // ADD EMPLOYEE
 
-  // LOGIN
+    if (
+      action ===
+      "addEmployee"
+    ) {
 
-  if (action === "login") {
+      const response =
+        await fetch(
+          "/api/employees",
+          {
+            method: "POST",
 
-    alert(
-      `Logged in as ${formData.username}`
-    );
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-    return;
-  }
+            body:
+              JSON.stringify({
+                name:
+                  formData.name,
 
-  // ADD EMPLOYEE
+                email:
+                  formData.email,
 
-  if (
-    action === "addEmployee"
-  ) {
+                role:
+                  formData.role,
+              }),
+          }
+        );
 
-    const employees =
-      JSON.parse(
-        localStorage.getItem(
-          "employees"
-        ) || "[]"
+      const data =
+        await response.json();
+
+      console.log(data);
+
+      alert(
+        "Employee Added!"
       );
 
-    employees.push(formData);
+      return data;
+    }
 
-    localStorage.setItem(
-      "employees",
-      JSON.stringify(employees)
-    );
+  } catch (error) {
 
-    alert(
-      "Employee added"
-    );
+    console.log(error);
 
-    window.location.reload();
-
-    return;
+    alert("Action failed");
   }
-
-  // DELETE EMPLOYEE
-
-  if (
-    action === "deleteEmployee"
-  ) {
-
-    const employees =
-      JSON.parse(
-        localStorage.getItem(
-          "employees"
-        ) || "[]"
-      );
-
-    employees.pop();
-
-    localStorage.setItem(
-      "employees",
-      JSON.stringify(employees)
-    );
-
-    alert(
-      "Employee deleted"
-    );
-
-    
-
-    return;
-  }
-
-  // DEFAULT
-
-  alert(
-    `Executed action: ${action}`
-  );
 }

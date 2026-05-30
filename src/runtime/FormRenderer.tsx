@@ -1,312 +1,412 @@
-import { executeAction } from "./actionExecutor";
-import { useState } from "react";
+"use client";
+
+import {
+  Upload,
+  Search,
+  Plus,
+  Download,
+} from "lucide-react";
+
 import TableRenderer from "./TableRenderer";
 import ChartRenderer from "./ChartRenderer";
+
 type Props = {
-  components: any[];
-
-  formData: any;
-
-  setFormData: any;
-
-  refresh: boolean;
-
-  setRefresh: any;
+  components?: any[];
 };
 
 export default function FormRenderer({
-  components,
-  formData,
-  setFormData,
-  refresh,
-  setRefresh
+  components = [],
 }: Props) {
 
   return (
-    <div className="space-y-4">
-      {components.map((component, index) => {
 
-          // INPUT
-          if (
-            component.type === "input"
-          ) {
-            return (
-              <div key={index}>
-                <label className="block mb-1 font-medium">
-                  {
-                    component.properties
-                      ?.label
-                  }
-                </label>
+    <div className="space-y-8">
 
-               <input
+      {/* ACTION BAR */}
 
-  value={
-    formData[
-      component.properties?.name
-    ] || ""
-  }
+      <div className="flex flex-wrap gap-4">
 
-  onChange={(e) =>
-    setFormData({
-      ...formData,
+        <button className="bg-cyan-500 hover:bg-cyan-600 px-5 py-3 rounded-xl font-semibold flex items-center gap-2">
 
-      [component.properties?.name]:
-        e.target.value,
-    })
-  }
+          <Plus size={18} />
 
-  placeholder={
-    component.properties
-      ?.placeholder
-  }
+          Add Record
 
- className="
-   border
-    p-2
-    rounded-lg
-    w-full
-  "
-/>
-              </div>
-            );
-          }
+        </button>
 
-          // TEXTAREA
-          if (
-            component.type ===
-            "textarea"
-          ) {
-            return (
-              <div key={index}>
-                <textarea
-                  placeholder={
-                    component.properties
-                      ?.placeholder
-                  }
-                  className="
-                    border
-                    p-3
-                    rounded-lg
-                    w-full
-                  "
-                />
-              </div>
-            );
-          }
+        <button className="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl flex items-center gap-2">
 
-          // SELECT
-          if (
-            component.type ===
-            "select"
-          ) {
-            return (
-              <div key={index}>
-                <select
-                  className="
-                    border
-                    p-3
-                    rounded-lg
-                    w-full
-                  "
-                >
-                  {(
-                    component.properties
-                      ?.options || []
-                  ).map(
-                    (
-                      option: string,
-                      i: number
-                    ) => (
-                      <option key={i}>
-                        {option}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
-            );
-          }
-         // TABLE
-// TABLE
-if (component.type === "table") {
-  return (
-    <div
-      key={index}
-      className="overflow-x-auto"
-    >
-      <table
-        className="
-          min-w-full
-          border
-          border-gray-300
-          rounded-lg
-          overflow-hidden
-        "
-      >
-        <thead className="bg-gray-100">
-          <tr>
-            {(
-              component.properties
-                ?.columns || []
-            ).map(
-              (
-                col: string,
-                i: number
-              ) => (
-                <th
-                  key={i}
-                  className="
-                    border
-                    p-3
-                    text-left
-                  "
-                >
-                  {col}
-                </th>
-              )
-            )}
-          </tr>
-        </thead>
+          <Upload size={18} />
 
-        <tbody>
-          {(
-            component.properties
-              ?.rows || []
-          ).map(
-            (
-              row: any,
-              rowIndex: number
-            ) => (
-              <tr
-                key={rowIndex}
-                className="
-                  hover:bg-gray-50
-                "
-              >
-                {row.map(
-                  (
-                    cell: any,
-                    cellIndex: number
-                  ) => (
-                    <td
-                      key={cellIndex}
-                      className="
-                        border
-                        p-3
-                      "
-                    >
-                      {cell}
-                    </td>
-                  )
-                )}
-              </tr>
-            )
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-          // BUTTON
-          if (
-            component.type ===
-            "button"
-          ) {
-           return (
-  <button
-    key={index}
- onClick={() => {
+          Upload File
 
-  executeAction(
-    component.properties
-      ?.action || "submit",
+        </button>
 
-    formData
-  );
+        <button className="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl flex items-center gap-2">
 
-  setRefresh(!refresh);
-}}
+          <Download size={18} />
 
-  className="
-    bg-black
-    text-white
-    px-4
-    py-2
-    rounded-lg
-  "
->
-  {
-    component.properties?.label
-  }
-</button>
-            );
-          }
-          // TEXT
-if (component.type === "text") {
-  return (
-    <p
-      key={index}
-      className="text-gray-700"
-    >
-      {
-        component.properties
-          ?.text
-      }
-    </p>
-  );
-}
+          Export Data
 
+        </button>
+
+      </div>
+
+      {/* SEARCH */}
+
+      <div className="relative">
+
+        <Search
+          className="absolute left-4 top-4 text-slate-400"
+          size={18}
+        />
+
+        <input
+          placeholder="Search records..."
+          className="w-full bg-slate-900 border border-slate-800 rounded-2xl py-4 pl-12 pr-5 outline-none focus:border-cyan-500"
+        />
+
+      </div>
+
+      {/* COMPONENTS */}
+
+      {components.map(
+        (
+          component: any,
+          index: number
+        ) => {
+
+          // =========================
           // CARD
+          // =========================
+
           if (
-            component.type === "card"
+            component?.type ===
+            "card"
           ) {
+
             return (
+
               <div
                 key={index}
-                className="
-                 bg-white
-shadow-2xl
-rounded-3xl
-p-10
-space-y-8
-max-w-5xl
-mx-auto
-                "
+                className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border border-slate-800 rounded-3xl p-6"
               >
-                <h3 className="font-bold text-lg">
+
+                <h3 className="text-2xl font-bold mb-3">
                   {
-                    component.properties
-                      ?.title
+                    component
+                      ?.properties
+                      ?.title ||
+                    "Dashboard Card"
                   }
                 </h3>
 
-                <p>
+                <p className="text-slate-300">
                   {
-                    component.properties
-                      ?.content
+                    component
+                      ?.properties
+                      ?.content ||
+                    "Runtime content"
                   }
                 </p>
+
               </div>
             );
-          } 
-          if (
-  component.type === "chart"
-) {
-  return (
-    <ChartRenderer
-      key={index}
-      data={
-        component.properties
-          ?.data || []
-      }
-    />
-  );
-}
+          }
 
-          return null;
+          // =========================
+          // TEXT
+          // =========================
+
+          if (
+            component?.type ===
+            "text"
+          ) {
+
+            return (
+
+              <div
+                key={index}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-6"
+              >
+
+                <p className="text-lg text-slate-300 leading-relaxed">
+                  {
+                    component
+                      ?.properties
+                      ?.text ||
+                    "Generated runtime text"
+                  }
+                </p>
+
+              </div>
+            );
+          }
+
+          // =========================
+          // INPUT
+          // =========================
+
+          if (
+            component?.type ===
+            "input"
+          ) {
+
+            return (
+
+              <div
+                key={index}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-6"
+              >
+
+                <label className="block text-sm text-slate-400 mb-3">
+
+                  {
+                    component
+                      ?.properties
+                      ?.label ||
+                    "Input"
+                  }
+
+                </label>
+
+                <input
+                  type="text"
+                  placeholder={
+                    component
+                      ?.properties
+                      ?.placeholder ||
+                    ""
+                  }
+                />
+
+                {/* FILE UPLOAD */}
+
+                <div className="mt-5 border-2 border-dashed border-slate-700 rounded-2xl p-8 text-center hover:border-cyan-500 transition-all">
+
+                  <p className="text-slate-400 mb-3">
+                    Drag & drop files here
+                  </p>
+
+                  <button className="bg-cyan-500 hover:bg-cyan-600 px-5 py-2 rounded-xl">
+                    Choose File
+                  </button>
+
+                </div>
+
+              </div>
+            );
+          }
+
+          // =========================
+          // TEXTAREA
+          // =========================
+
+          if (
+            component?.type ===
+            "textarea"
+          ) {
+
+            return (
+
+              <div
+                key={index}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-6"
+              >
+
+                <label className="block text-sm text-slate-400 mb-3">
+
+                  {
+                    component
+                      ?.properties
+                      ?.label ||
+                    "Textarea"
+                  }
+
+                </label>
+
+                <textarea
+                  rows={5}
+                  placeholder={
+                    component
+                      ?.properties
+                      ?.placeholder ||
+                    ""
+                  }
+                />
+
+              </div>
+            );
+          }
+
+          // =========================
+          // SELECT
+          // =========================
+
+          if (
+            component?.type ===
+            "select"
+          ) {
+
+            return (
+
+              <div
+                key={index}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-6"
+              >
+
+                <label className="block text-sm text-slate-400 mb-3">
+
+                  {
+                    component
+                      ?.properties
+                      ?.label ||
+                    "Select"
+                  }
+
+                </label>
+
+                <select>
+
+                  <option>
+                    Select option
+                  </option>
+
+                  {component
+                    ?.properties
+                    ?.options?.map(
+                      (
+                        option: any,
+                        optionIndex: number
+                      ) => (
+
+                        <option
+                          key={
+                            optionIndex
+                          }
+                        >
+                          {option}
+                        </option>
+                      )
+                    )}
+
+                </select>
+
+              </div>
+            );
+          }
+
+          // =========================
+          // BUTTON
+          // =========================
+
+          if (
+            component?.type ===
+            "button"
+          ) {
+
+            return (
+
+              <button
+                key={index}
+                className="bg-cyan-500 hover:bg-cyan-600 px-6 py-3 rounded-2xl font-semibold"
+              >
+
+                {
+                  component
+                    ?.properties
+                    ?.text ||
+                  "Submit"
+                }
+
+              </button>
+            );
+          }
+
+          // =========================
+          // TABLE
+          // =========================
+
+          if (
+            component?.type ===
+            "table"
+          ) {
+
+            return (
+
+              <TableRenderer
+                key={index}
+                columns={
+                  component
+                    ?.properties
+                    ?.columns || []
+                }
+                rows={
+                  component
+                    ?.properties
+                    ?.rows || []
+                }
+              />
+            );
+          }
+
+          // =========================
+          // CHART
+          // =========================
+
+          if (
+            component?.type ===
+            "chart"
+          ) {
+
+            return (
+              <ChartRenderer
+                key={index}
+              />
+            );
+          }
+
+          // =========================
+          // UNKNOWN
+          // =========================
+
+          return (
+
+            <div
+              key={index}
+              className="bg-red-500/10 border border-red-500 rounded-2xl p-5 text-red-400"
+            >
+
+              Unknown component:
+              {" "}
+              {
+                component?.type
+              }
+
+            </div>
+          );
         }
       )}
+
+      {/* EMPTY STATE */}
+
+      {components.length === 0 && (
+
+        <div className="bg-slate-900 border border-dashed border-slate-700 rounded-3xl p-12 text-center">
+
+          <h3 className="text-2xl font-bold mb-3">
+            No Components Generated
+          </h3>
+
+          <p className="text-slate-400">
+            Ask AI to generate forms,
+            dashboards, analytics,
+            or CRM modules.
+          </p>
+
+        </div>
+      )}
+
     </div>
   );
 }

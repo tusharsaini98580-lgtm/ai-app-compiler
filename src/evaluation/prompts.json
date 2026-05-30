@@ -1,0 +1,26 @@
+{
+  "realWorldPrompts": [
+    "Build a CRM with analytics",
+    "Build a HR management system",
+    "Build a SaaS dashboard",
+    "Build a school ERP",
+    "Build a hospital management system",
+    "Build a finance tracker",
+    "Build a project management app",
+    "Build an inventory management system",
+    "Build an AI resume platform",
+    "Build a customer support portal"
+  ],
+  "edgeCases": [
+    "build app",
+    "crm",
+    "make dashboard",
+    "something for hospital",
+    "system with login",
+    "inventory but no users",
+    "analytics and no database",
+    "multi role but no auth",
+    "billing and no payments",
+    "simple app but enterprise ready"
+  ]
+}

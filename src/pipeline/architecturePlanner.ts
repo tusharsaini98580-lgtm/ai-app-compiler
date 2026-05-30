@@ -1,82 +1,132 @@
-import { client } from "../lib/gemini";
+import { geminiModel } from "../lib/gemini";
 
-function sleep(ms: number) {
-  return new Promise((resolve) =>
-    setTimeout(resolve, ms)
-  );
+function cleanJSON(
+  text: string
+) {
+
+  return text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
 }
 
 export async function architecturePlanner(
   intent: any
 ) {
-  const prompt = `
-You are a senior software architect.
 
-Convert this app intent into structured architecture.
+  try {
+
+    const prompt = `
+
+You are an expert software architect.
+
+Convert the user intent into a clean application architecture plan.
 
 Return ONLY valid JSON.
 
-Schema:
+Required structure:
+
 {
-  "pages": [],
-  "roles": [],
-  "modules": [],
-  "dataFlows": []
+  "pages": [
+    {
+      "name": "Dashboard",
+      "purpose": "Main overview page"
+    }
+  ],
+
+  "roles": [
+    "Admin",
+    "User"
+  ],
+
+  "modules": [
+    "Authentication",
+    "Analytics"
+  ],
+
+  "dataFlows": [
+    {
+      "source": "Form",
+      "destination": "Database",
+      "description": "Stores records"
+    }
+  ]
 }
 
 Intent:
-${JSON.stringify(intent)}
+
+${JSON.stringify(
+  intent,
+  null,
+  2
+)}
+
+Do NOT explain anything.
+Return ONLY pure JSON.
+
 `;
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      console.log(
-        `Architecture attempt ${attempt}`
+    const result =
+      await geminiModel.generateContent(
+        prompt
       );
 
-      const completion =
-        await client.chat.completions.create({
-          model: "openai/gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-        });
+    const response =
+      await result.response;
 
-      const text =
-        completion.choices[0].message.content;
+    const text =
+      response.text();
 
-      console.log(
-        "ARCHITECTURE RESPONSE:"
-      );
-      console.log(text);
+    const cleaned =
+      cleanJSON(text);
 
-      if (!text) {
-        throw new Error(
-          "Empty architecture response"
-        );
-      }
+    const parsed =
+      JSON.parse(cleaned);
 
-      const cleanedText = text
-  .replace(/```json/g, "")
-  .replace(/```/g, "")
-  .trim();
+    return {
 
-return JSON.parse(cleanedText);
-    } catch (error) {
-      console.error(
-        "Architecture planning failed:",
-        error
-      );
+      pages:
+        parsed.pages || [],
 
-      await sleep(3000);
-    }
+      roles:
+        parsed.roles || [],
+
+      modules:
+        parsed.modules || [],
+
+      dataFlows:
+        parsed.dataFlows || [],
+    };
+
+  } catch (error) {
+
+    console.error(
+      "Architecture planning failed:",
+      error
+    );
+
+    return {
+
+      pages: [
+        {
+          name:
+            "Dashboard",
+
+          purpose:
+            "Main application page",
+        },
+      ],
+
+      roles: [
+        "Admin",
+        "User",
+      ],
+
+      modules: [
+        "Dashboard",
+      ],
+
+      dataFlows: [],
+    };
   }
-
-  return {
-    success: false,
-    error: "Architecture planner failed",
-  };
 }

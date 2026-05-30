@@ -1,139 +1,86 @@
-import { extractIntent } from "../../../pipeline/intentExtractor";
-import { architecturePlanner } from "../../../pipeline/architecturePlanner";
-import { schemaGenerator } from "../../../pipeline/schemaGenerator";
-import { validateSchema } from "../../../pipeline/validator";
-import { repairSchema } from "../../../pipeline/repairEngine";
+import { NextResponse } from "next/server";
 
+import {
+  compileApplication,
+} from "../../../pipeline/compiler";
 
-export async function POST(req: Request) {
+export const dynamic =
+  "force-dynamic";
+
+export const maxDuration =
+  60;
+
+export async function POST(
+  req: Request
+) {
 
   try {
 
-    const body = await req.json();
+    const body =
+      await req.json();
 
-    // STEP 1 — Extract intent
+    const prompt =
+      body?.prompt;
 
-    const intent =
-      await extractIntent(
-        body.prompt
-      );
+    // =========================
+    // VALIDATION
+    // =========================
 
     if (
-      (intent as any).success === false
+      !prompt ||
+
+      typeof prompt !==
+        "string" ||
+
+      prompt.trim().length < 3
     ) {
 
-      return Response.json(
-        intent,
+      return NextResponse.json(
         {
-          status: 500,
+          success: false,
+
+          error:
+            "Please enter a valid prompt.",
+        },
+        {
+          status: 400,
         }
       );
     }
 
-    // STEP 2 — Generate architecture
+    // =========================
+    // COMPILE APP
+    // =========================
 
-    const architecture =
-      await architecturePlanner(
-        intent
+    const compiledData =
+      await compileApplication(
+        prompt
       );
 
-    let finalSchema = null;
+    // =========================
+    // SUCCESS
+    // =========================
 
-    // STEP 3 — Retry loop
-
-    for (
-      let attempt = 1;
-      attempt <= 3;
-      attempt++
-    ) {
-
-      console.log(
-        `Schema generation attempt ${attempt}`
-      );
-
-      // Generate schema
-
-      const schemaResult =
-        await schemaGenerator(
-          architecture
-        );
-
-      console.log(
-        "FULL RESULT",
-        schemaResult
-      );
-
-      // Validate schema
-
-      const validation =
-        validateSchema(
-          schemaResult
-        );
-
-      // VALID
-
-      if (validation.valid) {
-
-        console.log(
-          "VALID SCHEMA GENERATED"
-        );
-
-        finalSchema =
-          schemaResult;
-
-        // RETURN IMMEDIATELY
-
-        return Response.json({
-          success: true,
-          repaired: false,
-          intent,
-          architecture,
-          schemas: finalSchema,
-        });
-      }
-
-      // INVALID
-
-      console.log(
-        "VALIDATION FAILED"
-      );
-
-      console.log(
-        validation.errors
-      );
-
-      // Repair schema
-
-      finalSchema =
-        repairSchema(
-          schemaResult
-        );
-    }
-
-    // AFTER ALL RETRIES
-
-    return Response.json({
+    return NextResponse.json({
       success: true,
-      repaired: true,
-      intent,
-      architecture,
-      schemas: finalSchema,
+
+      ...compiledData,
     });
 
-  } catch (error) {
+  } catch (error: any) {
 
     console.error(
-      "Pipeline failed:",
+      "Compiler API Error:",
       error
     );
 
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
+
         error:
-          "Pipeline failed",
-        details:
-          String(error),
+          error?.message ||
+          "Failed to compile application.",
       },
       {
         status: 500,

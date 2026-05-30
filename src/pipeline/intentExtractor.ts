@@ -1,75 +1,172 @@
-import { client } from "../lib/gemini";
+import { geminiModel } from "../lib/gemini";
 
-function sleep(ms: number) {
-  return new Promise((resolve) =>
-    setTimeout(resolve, ms)
-  );
+function cleanJSON(
+  text: string
+) {
+
+  return text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
 }
 
-export async function extractIntent(userPrompt: string) {
-  const prompt = `
-You are an AI system compiler.
+export async function extractIntent(
+  userPrompt: string
+) {
 
-Extract the app intent into STRICT JSON.
+  try {
+
+    const prompt = `
+
+You are an AI intent extraction system.
+
+Convert the user request into structured JSON.
 
 Return ONLY valid JSON.
 
-Schema:
+Required structure:
+
 {
-  "appType": "",
-  "features": [],
-  "roles": [],
-  "entities": []
+  "appType": "string",
+
+  "features": [
+    "string"
+  ],
+
+  "roles": [
+    "string"
+  ],
+
+  "entities": [
+    "string"
+  ],
+
+  "assumptionsMade": [
+    "string"
+  ]
 }
 
 User Request:
+
 ${userPrompt}
+
+Rules:
+- If request is vague, make smart assumptions
+- Include standard features
+- Keep output lightweight
+- No explanations
+- No markdown
+- Return only JSON
+
 `;
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      console.log(`Attempt ${attempt}`);
+    const result =
+      await geminiModel.generateContent(
+        prompt
+      );
 
-      const completion =
-        await client.chat.completions.create({
-          model: "openai/gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-        });
+    const response =
+      await result.response;
 
-      console.log("FULL COMPLETION:");
-      console.log(completion);
+    const text =
+      response.text();
 
-      const text =
-        completion.choices[0].message.content;
+    const cleaned =
+      cleanJSON(text);
 
-      console.log("TEXT:");
-      console.log(text);
+    const parsed =
+      JSON.parse(cleaned);
 
-      if (!text) {
-        throw new Error("Empty response");
-      }
+    // =========================
+    // SAFE FALLBACKS
+    // =========================
 
-     const cleanedText = text
-  .replace(/```json/g, "")
-  .replace(/```/g, "")
-  .trim();
+    return {
 
-return JSON.parse(cleanedText);
-    } catch (error: any) {
-      console.error("REAL ERROR:");
-      console.error(error);
+      appType:
+        parsed.appType ||
+        "Management System",
 
-      await sleep(3000);
-    }
+      features:
+        Array.isArray(
+          parsed.features
+        ) &&
+        parsed.features.length > 0
+
+          ? parsed.features
+
+          : [
+              "Dashboard",
+              "Authentication",
+              "Data Management",
+            ],
+
+      roles:
+        Array.isArray(
+          parsed.roles
+        ) &&
+        parsed.roles.length > 0
+
+          ? parsed.roles
+
+          : [
+              "Admin",
+              "User",
+            ],
+
+      entities:
+        Array.isArray(
+          parsed.entities
+        ) &&
+        parsed.entities.length > 0
+
+          ? parsed.entities
+
+          : [
+              "users",
+              "records",
+            ],
+
+      assumptionsMade:
+        Array.isArray(
+          parsed.assumptionsMade
+        )
+
+          ? parsed.assumptionsMade
+
+          : [],
+    };
+
+  } catch (error) {
+
+    console.error(
+      "Intent extraction failed:",
+      error
+    );
+
+    return {
+
+      appType:
+        "Management System",
+
+      features: [
+        "Dashboard",
+        "Authentication",
+      ],
+
+      roles: [
+        "Admin",
+        "User",
+      ],
+
+      entities: [
+        "users",
+        "records",
+      ],
+
+      assumptionsMade: [
+        "Used default fallback intent",
+      ],
+    };
   }
-
-  return {
-    success: false,
-    error: "Max retries exceeded",
-  };
 }
