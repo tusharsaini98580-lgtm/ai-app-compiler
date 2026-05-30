@@ -1,201 +1,159 @@
 import { NextResponse } from "next/server";
 
-import {
-  compileApplication,
-} from "../../../pipeline/compiler";
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const prompt = body.prompt;
 
-// =========================
-// TEST DATASET
-// =========================
+    if (!prompt) {
+      return NextResponse.json(
+        { error: "Prompt is required" },
+        { status: 400 }
+      );
+    }
 
-const TEST_CASES = [
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
 
-  // REAL APPS
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "http://localhost:3000",
+          "X-Title": "RuntimeOS",
+        },
 
-  {
-    id: "REAL-01",
+        body: JSON.stringify({
+          model: "openai/gpt-3.5-turbo",
 
-    prompt:
-      "Build a hospital management system",
-  },
+          temperature: 0.7,
 
-  {
-    id: "REAL-02",
+          max_tokens: 2500,
 
-    prompt:
-      "Create a school management dashboard",
-  },
+          messages: [
+            {
+              role: "system",
 
-  {
-    id: "REAL-03",
+              content: `
+You are an elite AI SaaS compiler.
 
-    prompt:
-      "Build an employee CRM system",
-  },
+You generate REAL enterprise applications.
 
-  {
-    id: "REAL-04",
+You ONLY return valid JSON.
 
-    prompt:
-      "Create an inventory tracking app",
-  },
+Never return markdown.
+Never return explanations.
+Never return triple backticks.
 
-  {
-    id: "REAL-05",
+Generate realistic:
+- CRM systems
+- SaaS dashboards
+- ERP systems
+- Hospital systems
+- School systems
+- HR platforms
+- Analytics dashboards
 
-    prompt:
-      "Build a gym membership platform",
-  },
+The JSX must be REAL React + Tailwind UI.
+`,
+            },
 
-  // EDGE CASES
+            {
+              role: "user",
 
-  {
-    id: "EDGE-01",
+              content: `
+Build a production-ready SaaS app for:
 
-    prompt:
-      "Build a dashboard",
-  },
+"${prompt}"
 
-  {
-    id: "EDGE-02",
+Return ONLY valid JSON in this EXACT structure:
 
-    prompt:
-      "Create a form app",
-  },
+{
+  "title": "",
+  "description": "",
+  "features": [],
+  "pages": [
+    {
+      "name": "",
+      "route": "",
+      "description": ""
+    }
+  ],
+  "databaseTables": [],
+  "apiRoutes": [],
+  "components": [],
+  "jsx": ""
+}
 
-  {
-    id: "EDGE-03",
+Rules:
 
-    prompt:
-      "Hospital app",
-  },
+- title should be realistic
+- pages must be real SaaS pages
+- databaseTables must be production-grade
+- apiRoutes must be REST API routes
+- features must be enterprise-level
+- jsx must contain REAL React + Tailwind dashboard UI
+- jsx must NOT contain markdown
+- jsx must NOT contain triple backticks
+`,
+            },
+          ],
+        }),
+      }
+    );
 
-  {
-    id: "EDGE-04",
+    if (!response.ok) {
+      const errorText = await response.text();
 
-    prompt:
-      "Role based application",
-  },
+      console.error("OPENROUTER ERROR:", errorText);
 
-  {
-    id: "EDGE-05",
+      return NextResponse.json(
+        {
+          error: "OpenRouter request failed",
+          details: errorText,
+        },
+        { status: 500 }
+      );
+    }
 
-    prompt:
-      "Application with charts and tables",
-  },
-];
+    const data = await response.json();
 
-// =========================
-// EVALUATION ROUTE
-// =========================
+    const rawContent =
+      data?.choices?.[0]?.message?.content || "{}";
 
-export async function GET() {
+    const cleanedContent = rawContent
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-  const results: any[] = [];
-
-  let passed = 0;
-
-  let failed = 0;
-
-  let totalLatency = 0;
-
-  // =========================
-  // RUN TESTS
-  // =========================
-
-  for (const test of TEST_CASES) {
-
-    const start =
-      performance.now();
+    let parsed;
 
     try {
+      parsed = JSON.parse(cleanedContent);
+    } catch (parseError) {
+      console.error("JSON PARSE ERROR:", parseError);
 
-      const result =
-        await compileApplication(
-          test.prompt
-        );
-
-      const latency =
-        performance.now() - start;
-
-      totalLatency += latency;
-
-      // =========================
-      // VALIDATION
-      // =========================
-
-      const success =
-
-        !!result?.uiSchema &&
-        Array.isArray(
-          result.uiSchema.pages
-        );
-
-      if (success) {
-
-        passed++;
-
-      } else {
-
-        failed++;
-      }
-
-      results.push({
-
-        id: test.id,
-
-        prompt: test.prompt,
-
-        success,
-
-        latency:
-          `${latency.toFixed(0)}ms`,
-
-        pages:
-          result?.uiSchema
-            ?.pages?.length || 0,
-      });
-
-    } catch (error: any) {
-
-      failed++;
-
-      results.push({
-
-        id: test.id,
-
-        prompt: test.prompt,
-
-        success: false,
-
-        error:
-          error?.message ||
-          "Evaluation failed",
-      });
+      return NextResponse.json(
+        {
+          error: "Invalid AI JSON response",
+          raw: cleanedContent,
+        },
+        { status: 500 }
+      );
     }
+
+    return NextResponse.json(parsed);
+
+  } catch (error: any) {
+    console.error("SERVER ERROR:", error);
+
+    return NextResponse.json(
+      {
+        error: "Runtime generation failed",
+        details: error.message,
+      },
+      { status: 500 }
+    );
   }
-
-  // =========================
-  // SUMMARY
-  // =========================
-
-  return NextResponse.json({
-
-    success: true,
-
-    totalTests:
-      TEST_CASES.length,
-
-    passed,
-
-    failed,
-
-    averageLatency:
-      `${(
-        totalLatency /
-        TEST_CASES.length
-      ).toFixed(0)}ms`,
-
-    results,
-  });
 }

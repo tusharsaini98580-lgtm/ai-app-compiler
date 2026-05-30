@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-
 import toast from "react-hot-toast";
 
 import {
@@ -46,9 +45,7 @@ function SidebarItem({
     >
       {icon}
 
-      <span className="font-medium">
-        {label}
-      </span>
+      <span className="font-medium">{label}</span>
     </div>
   );
 }
@@ -77,9 +74,7 @@ function AnalyticsCard({
         {title}
       </div>
 
-      <div className="text-5xl font-black mb-8">
-        {value}
-      </div>
+      <div className="text-5xl font-black mb-8">{value}</div>
 
       <div className="flex items-end gap-2 h-16">
         {[25, 40, 32, 60, 45].map((h, i) => (
@@ -98,35 +93,59 @@ function AnalyticsCard({
 
 export default function DashboardPage() {
   const [prompt, setPrompt] = useState(
-    "build enterprise CRM SaaS platform..."
+    "build enterprise CRM SaaS platform"
   );
 
   const [modifyPrompt, setModifyPrompt] = useState(
-    "Add analytics dashboard..."
+    "Add analytics dashboard"
   );
 
   const [loading, setLoading] = useState(false);
 
   const [darkMode, setDarkMode] = useState(true);
 
+  const [generatedRuntime, setGeneratedRuntime] = useState<any>(null);
+
+  const [selectedPage, setSelectedPage] = useState<any>(null);
+
+  const [activeTab, setActiveTab] = useState("frontend");
+
   async function generateApplication() {
     try {
       setLoading(true);
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1800)
-      );
+      const response = await fetch("/api/evaluate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+        }),
+      });
 
-      toast.success(
-        "AI runtime generated successfully"
-      );
+      if (!response.ok) {
+        throw new Error("Failed to generate runtime");
+      }
+
+      const data = await response.json();
+
+      console.log(data);
+
+      setGeneratedRuntime(data);
+
+      toast.success("AI runtime generated successfully");
     } catch (error) {
-      toast.error(
-        "Runtime generation failed"
-      );
+      console.error(error);
+
+      toast.error("Runtime generation failed");
     } finally {
       setLoading(false);
     }
+  }
+
+  function modifyApplication() {
+    toast.success(`Modification queued: ${modifyPrompt}`);
   }
 
   return (
@@ -150,22 +169,15 @@ export default function DashboardPage() {
         className="
           hidden
           lg:flex
-
           w-72
-
           flex-col
-
           border-r
           border-white/10
-
           bg-black/30
           backdrop-blur-2xl
-
           p-6
         "
       >
-        {/* LOGO */}
-
         <div className="mb-12">
           <div className="flex items-center gap-4 mb-4">
             <div
@@ -183,15 +195,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <h1
-                className="
-                  text-4xl
-                  font-black
-                  flex
-                  items-center
-                  gap-4
-                "
-              >
+              <h1 className="text-4xl font-black flex items-center gap-4">
                 RuntimeOS
               </h1>
 
@@ -201,8 +205,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* NAVIGATION */}
 
         <div className="space-y-3">
           <SidebarItem
@@ -236,352 +238,402 @@ export default function DashboardPage() {
             label="Settings"
           />
         </div>
-
-        {/* STATUS */}
-
-        <div
-          className="
-            mt-auto
-            rounded-3xl
-            border border-green-400/20
-            bg-green-500/10
-            p-5
-          "
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
-
-            <div className="font-semibold text-green-300">
-              AI Runtime Engine Active
-            </div>
-          </div>
-
-          <p className="text-sm text-slate-300 leading-relaxed">
-            Production infrastructure operational
-            across all deployment pipelines.
-          </p>
-        </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* CONTENT */}
 
-      <div
-        className="
-          flex-1
-          overflow-y-auto
-          px-8
-          py-6
-        "
-      >
+      <div className="flex-1 p-8 overflow-y-auto">
         {/* TOPBAR */}
 
-        <div
-          className="
-            flex
-            flex-wrap
-            items-center
-            justify-between
-            gap-6
-            mb-8
-          "
-        >
-          {/* LEFT */}
-
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <div
-              className="
-                inline-flex
-                items-center
-                gap-2
-                px-4
-                py-2
-                rounded-full
-                border border-green-400/20
-                bg-green-500/10
-                text-green-300
-                mb-5
-              "
-            >
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-
-              Systems Operational
-            </div>
-
-            <h1 className="text-6xl font-black leading-tight mb-4">
-              Build Enterprise
-              <br />
-              AI Runtime Systems
+            <h1 className="text-5xl font-black mb-2">
+              RuntimeOS
             </h1>
 
-            <p className="text-slate-400 text-lg max-w-3xl leading-relaxed">
-              AI-powered runtime compiler that transforms prompts into production-grade SaaS applications.
+            <p className="text-slate-400">
+              AI Powered SaaS Compiler
             </p>
           </div>
 
-          {/* RIGHT */}
-
-          <div className="flex items-center gap-5">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="
-                px-5 py-3
-                rounded-2xl
-                border border-white/10
-                bg-white/5
-                hover:bg-white/10
-                transition-all
-              "
-            >
-              {darkMode ? (
-                <Sun size={20} />
-              ) : (
-                <Moon size={20} />
-              )}
-            </button>
-
-            <button
-              className="
-                w-12 h-12
-                rounded-2xl
-                border border-white/10
-                bg-white/5
-                flex items-center justify-center
-              "
-            >
+          <div className="flex items-center gap-4">
+            <button className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
               <Bell size={20} />
             </button>
 
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="font-semibold text-lg">
-                  Tushar Saini
-                </div>
-
-                <div className="text-slate-400 text-sm">
-                  Runtime Engineer
-                </div>
-              </div>
-
-              <div
-                className="
-                  w-12 h-12
-                  rounded-full
-                  bg-gradient-to-r
-                  from-cyan-500
-                  to-blue-500
-                  flex items-center justify-center
-                  font-black
-                "
-              >
-                T
-              </div>
-            </div>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center"
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
           </div>
         </div>
 
         {/* ANALYTICS */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <AnalyticsCard
-            title="Runtime Executions"
-            value="12.4K"
-          />
-
-          <AnalyticsCard
-            title="Deployments"
-            value="842"
-          />
-
-          <AnalyticsCard
-            title="Schema Accuracy"
+            title="Runtime Accuracy"
             value="98%"
           />
 
           <AnalyticsCard
-            title="Runtime Speed"
+            title="Compile Speed"
             value="4.1s"
+          />
+
+          <AnalyticsCard
+            title="Projects Generated"
+            value="120+"
           />
         </div>
 
         {/* MAIN GRID */}
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* GENERATE */}
 
-          <div
-            className="
-              xl:col-span-5
-
-              rounded-[32px]
-
-              border
-              border-white/10
-
-              bg-white/5
-              backdrop-blur-xl
-
-              p-8
-            "
-          >
-            <div className="flex items-center gap-3 mb-8">
+          <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-8">
+            <div className="flex items-center gap-3 mb-6">
               <Sparkles className="text-cyan-400" />
 
-              <h2 className="text-3xl font-black">
+              <h2 className="text-4xl font-black">
                 Generate Application
               </h2>
             </div>
 
             <textarea
               value={prompt}
-              onChange={(e) =>
-                setPrompt(e.target.value)
-              }
-              rows={8}
-              placeholder="Describe your SaaS application..."
+              onChange={(e) => setPrompt(e.target.value)}
               className="
                 w-full
-
-                rounded-2xl
-
-                border
-                border-white/10
-
-                bg-black/30
-
-                px-5
-                py-4
-
-                text-white
-
+                h-56
+                rounded-3xl
+                bg-[#020617]
+                border border-white/10
+                p-6
+                text-lg
+                resize-none
                 outline-none
-
-                focus:border-cyan-400/40
-
-                transition-all
               "
             />
 
             <button
               onClick={generateApplication}
-              disabled={loading}
               className="
-                mt-5
-
                 w-full
-
-                rounded-2xl
-
+                mt-6
+                py-5
+                rounded-3xl
                 bg-gradient-to-r
                 from-cyan-500
                 to-blue-500
-
-                py-4
-
-                font-semibold
-
+                text-xl
+                font-bold
                 hover:scale-[1.02]
-
                 transition-all
               "
             >
-              {loading
-                ? "Generating Runtime..."
-                : "Generate Runtime"}
+              {loading ? "Compiling AI Runtime..." : "Generate Runtime"}
+            </button>
+
+            <button
+              className="w-full mt-4 py-4 rounded-3xl bg-purple-600 hover:bg-purple-700 transition-all font-bold"
+            >
+              Export Project
             </button>
           </div>
 
-          {/* EMPTY STATE */}
+          {/* GENERATED RUNTIME */}
 
-          <div
-            className="
-              xl:col-span-4
+          <div className="rounded-[32px] border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-xl p-8 overflow-hidden">
+            <div className="flex gap-2 mb-4 flex-wrap">
+              <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                AI Active
+              </div>
 
-              rounded-[32px]
+              <div className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-sm">
+                Runtime Compiler
+              </div>
 
-              border
-              border-white/10
-
-              bg-gradient-to-br
-              from-cyan-500/10
-              to-blue-500/10
-
-              backdrop-blur-xl
-
-              p-10
-
-              flex
-              flex-col
-              justify-center
-              items-center
-
-              text-center
-            "
-          >
-            <div className="text-7xl mb-6">
-              ⚡
+              <div className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
+                Live Preview
+              </div>
             </div>
 
-            <h2 className="text-4xl font-black mb-5">
-              No Runtime Generated Yet
-            </h2>
+            {generatedRuntime ? (
+              <div className="space-y-6 text-white">
+                <h1 className="text-5xl font-black leading-tight">
+                  {generatedRuntime.title}
+                </h1>
 
-            <p className="text-slate-300 text-lg leading-relaxed">
-              Generate enterprise SaaS applications dynamically using AI-powered runtime orchestration pipelines.
-            </p>
+                <div>
+                  <h2 className="text-cyan-400 text-xl mb-3">
+                    Pages
+                  </h2>
+
+                  <div className="flex flex-wrap gap-3">
+                    {generatedRuntime.pages?.map((page: any, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedPage(page)}
+                        className="px-4 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-600 transition-all"
+                      >
+                        {page.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedPage && (
+                  <div className="bg-black/40 border border-cyan-500 rounded-3xl p-6">
+                    <h2 className="text-3xl font-black mb-3">
+                      {selectedPage.name}
+                    </h2>
+
+                    <p className="text-slate-300 mb-2">
+                      Route: {selectedPage.route}
+                    </p>
+
+                    <p>{selectedPage.description}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 mb-4 flex-wrap">
+                  <button
+                    onClick={() => setActiveTab("frontend")}
+                    className={`px-4 py-2 rounded-xl ${
+                      activeTab === "frontend"
+                        ? "bg-cyan-500 text-white"
+                        : "bg-black/40 text-slate-300"
+                    }`}
+                  >
+                    Frontend
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("backend")}
+                    className={`px-4 py-2 rounded-xl ${
+                      activeTab === "backend"
+                        ? "bg-cyan-500 text-white"
+                        : "bg-black/40 text-slate-300"
+                    }`}
+                  >
+                    Backend
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("database")}
+                    className={`px-4 py-2 rounded-xl ${
+                      activeTab === "database"
+                        ? "bg-cyan-500 text-white"
+                        : "bg-black/40 text-slate-300"
+                    }`}
+                  >
+                    Database
+                  </button>
+                </div>
+
+                {activeTab === "frontend" && (
+                <iframe
+  title="Generated App"
+  className="w-full h-[500px] rounded-3xl border border-cyan-500 bg-white"
+  srcDoc={`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <style>
+          body {
+            background: #f1f5f9;
+            padding: 30px;
+            font-family: sans-serif;
+          }
+
+          .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <div class="card">
+          <h1 style="font-size:32px;font-weight:bold;margin-bottom:20px;">
+            ${generatedRuntime.title || "Generated SaaS"}
+          </h1>
+
+          <div style="display:grid;gap:16px;grid-template-columns:repeat(2,1fr);">
+
+            ${(generatedRuntime.pages || [])
+              .map(
+                (page: any) => `
+                  <div style="
+                    background:#0f172a;
+                    color:white;
+                    padding:20px;
+                    border-radius:16px;
+                  ">
+                    <h2 style="font-size:20px;font-weight:bold;">
+                      ${page.name}
+                    </h2>
+
+                    <p style="margin-top:10px;">
+                      ${page.description || ""}
+                    </p>
+
+                    <div style="
+                      margin-top:12px;
+                      font-size:14px;
+                      opacity:0.7;
+                    ">
+                      Route: ${page.route}
+                    </div>
+                  </div>
+                `
+              )
+              .join("")}
+
+          </div>
+
+        </div>
+
+      </body>
+    </html>
+  `}
+/>
+                )}
+
+                {activeTab === "backend" && (
+                  <div className="bg-black p-4 rounded-3xl overflow-auto text-green-400 text-sm">
+                    <pre>
+{`// Express API Example
+
+app.get("/api/users", async (req, res) => {
+  const users = await prisma.user.findMany();
+
+  res.json(users);
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  // JWT LOGIN
+});`}
+                    </pre>
+                  </div>
+                )}
+
+                {activeTab === "database" && (
+                  <div className="bg-black p-4 rounded-3xl text-cyan-400">
+                    {generatedRuntime.databaseTables?.map(
+                      (table: string, i: number) => (
+                        <div
+                          key={i}
+                          className="border border-cyan-500 rounded-2xl p-4 mb-3"
+                        >
+                          📦 {table}
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <h2 className="text-cyan-400 text-xl mb-3">
+                    Features
+                  </h2>
+
+                  <ul className="list-disc pl-6 space-y-2">
+                    {generatedRuntime.features?.map(
+                      (feature: string, i: number) => (
+                        <li key={i}>{feature}</li>
+                      )
+                    )}
+                  </ul>
+                </div>
+
+                <div>
+                  <h2 className="text-cyan-400 text-xl mb-3">
+                    API Routes
+                  </h2>
+
+                  <ul className="list-disc pl-6 space-y-2">
+                    {generatedRuntime.apiRoutes?.map(
+                      (route: string, i: number) => (
+                        <li key={i}>{route}</li>
+                      )
+                    )}
+                  </ul>
+                </div>
+
+                <div>
+                  <h2 className="text-cyan-400 text-xl mb-3">
+                    Project Structure
+                  </h2>
+
+                  <div className="bg-black/40 p-4 rounded-2xl text-sm text-slate-300 space-y-1">
+                    <p>📁 app/</p>
+                    <p> ┣ 📄 dashboard/page.tsx</p>
+                    <p> ┣ 📄 students/page.tsx</p>
+                    <p> ┣ 📄 api/students/route.ts</p>
+                    <p> ┣ 📄 api/auth/route.ts</p>
+                    <p> ┗ 📄 layout.tsx</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center min-h-[500px]">
+                <div className="text-7xl mb-6">⚡</div>
+
+                <h2 className="text-5xl font-black mb-4">
+                  No Runtime Generated Yet
+                </h2>
+
+                <p className="text-slate-400 text-lg max-w-md leading-relaxed">
+                  Generate enterprise SaaS applications dynamically using AI-powered runtime orchestration pipelines.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* MODIFY */}
 
-          <div
-            className="
-              xl:col-span-3
-
-              rounded-[32px]
-
-              border
-              border-white/10
-
-              bg-white/5
-              backdrop-blur-xl
-
-              p-8
-            "
-          >
-            <h2 className="text-3xl font-black mb-6">
+          <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-8">
+            <h2 className="text-4xl font-black mb-6">
               Modify Runtime
             </h2>
 
             <textarea
               value={modifyPrompt}
-              onChange={(e) =>
-                setModifyPrompt(e.target.value)
-              }
-              rows={6}
+              onChange={(e) => setModifyPrompt(e.target.value)}
               className="
                 w-full
-                rounded-2xl
+                h-56
+                rounded-3xl
+                bg-[#020617]
                 border border-white/10
-                bg-black/30
-                px-5 py-4
-                text-white
+                p-6
+                text-lg
+                resize-none
                 outline-none
               "
             />
 
             <button
-              onClick={() =>
-                toast.success(
-                  "Runtime modified successfully"
-                )
-              }
+              onClick={modifyApplication}
               className="
-                mt-5
                 w-full
-                rounded-2xl
-                border border-white/10
+                mt-6
+                py-5
+                rounded-3xl
                 bg-white/10
-                py-4
-                font-semibold
+                border border-white/10
+                text-xl
+                font-bold
                 hover:bg-white/20
                 transition-all
               "
@@ -589,57 +641,25 @@ export default function DashboardPage() {
               Modify Runtime
             </button>
           </div>
+        </div>
 
-          {/* LOGS */}
+        {/* TERMINAL */}
 
-          <div
-            className="
-              xl:col-span-12
+        <div className="mt-8 bg-black rounded-[32px] p-6 border border-cyan-500/20">
+          <h2 className="text-green-400 font-bold mb-4 text-xl">
+            AI Compiler Terminal
+          </h2>
 
-              rounded-[32px]
-
-              border
-              border-white/10
-
-              bg-black/30
-              backdrop-blur-xl
-
-              p-8
-            "
-          >
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-black">
-                Runtime Logs
-              </h2>
-
-              <div className="flex items-center gap-2 text-green-300">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-
-                Streaming
-              </div>
-            </div>
-
-            <div className="space-y-4 font-mono text-sm">
-              <div className="text-green-400">
-                ✓ Intent extraction completed
-              </div>
-
-              <div className="text-cyan-400">
-                ✓ Runtime schema generated
-              </div>
-
-              <div className="text-purple-400">
-                ✓ API orchestration validated
-              </div>
-
-              <div className="text-yellow-400">
-                ✓ Deployment pipeline initialized
-              </div>
-            </div>
+          <div className="font-mono text-sm text-green-400 space-y-2">
+            <p>✓ Initializing RuntimeOS Compiler...</p>
+            <p>✓ Parsing architecture...</p>
+            <p>✓ Building frontend...</p>
+            <p>✓ Building backend APIs...</p>
+            <p>✓ Generating database schema...</p>
+            <p>✓ Runtime compilation complete</p>
           </div>
         </div>
       </div>
     </main>
   );
 }
-
