@@ -184,7 +184,7 @@ export default function Navbar() {
           {/* LOGIN */}
 
           <a
-            href="/dashboard"
+  href="/login"
             className="
               px-5
               py-2
@@ -209,8 +209,8 @@ export default function Navbar() {
 
           {/* BUTTON */}
 
-          <a
-            href="/dashboard"
+         <a
+  href="/signup"
             className="
               px-6
               py-3

@@ -143,10 +143,51 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }
+async function modifyApplication() {
+  try {
+    setLoading(true);
 
-  function modifyApplication() {
-    toast.success(`Modification queued: ${modifyPrompt}`);
+    const combinedPrompt = `
+Existing Application:
+${generatedRuntime?.title || ""}
+
+Existing Features:
+${generatedRuntime?.features?.join(", ") || ""}
+
+Modification Request:
+${modifyPrompt}
+`;
+
+    const response = await fetch("/api/evaluate", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        prompt: combinedPrompt,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to modify runtime");
+    }
+
+    const data = await response.json();
+
+    setGeneratedRuntime(data);
+
+    toast.success("Runtime modified successfully");
+
+  } catch (error) {
+    console.error(error);
+
+    toast.error("Runtime modification failed");
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <main
@@ -267,6 +308,24 @@ export default function DashboardPage() {
             >
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+
+            <button
+  onClick={() => {
+    window.location.href = "/login";
+  }}
+  className="
+    px-5 py-3
+    rounded-2xl
+    bg-red-500/20
+    border border-red-500/20
+    text-red-400
+    hover:bg-red-500/30
+    transition-all
+  "
+>
+  Logout
+</button>
+
           </div>
         </div>
 
