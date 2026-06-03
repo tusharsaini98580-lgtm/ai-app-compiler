@@ -1,249 +1,102 @@
-export const SYSTEM_DESIGN_SCHEMA = {
+import { AppIntent }
+  from "../lib/types/app";
 
-  type: "object",
+export function schemaPrompt(
+  intent: AppIntent
+) {
 
-  properties: {
+  return `
 
-    roles: {
+You are an advanced AI application compiler.
 
-      type: "array",
+Generate a VALID JSON application schema.
 
-      items: {
-        type: "string",
-      },
+Application Intent:
 
-    },
+${JSON.stringify(
+  intent,
+  null,
+  2
+)}
 
-    entities: {
+Return ONLY valid JSON.
 
-      type: "array",
+Required structure:
 
-      items: {
-
-        type: "object",
-
-        properties: {
-
-          name: {
-            type: "string",
+{
+  "uiSchema": {
+    "pages": [
+      {
+        "name": "Dashboard",
+        "route": "/dashboard",
+        "layout": "grid",
+        "components": [
+          {
+            "type": "text",
+            "properties": {
+              "text": "Welcome to RuntimeOS"
+            }
           },
-
-          fields: {
-
-            type: "array",
-
-            items: {
-              type: "string",
-            },
-
-          },
-
-        },
-
-        required: [
-          "name",
-          "fields",
-        ],
-
-      },
-
-    },
-
+          {
+            "type": "button",
+            "properties": {
+              "text": "Submit"
+            }
+          }
+        ]
+      }
+    ]
   },
 
-  required: [
-    "roles",
-    "entities",
-  ],
-
-};
-
-export const FINAL_COMPILER_SCHEMA = {
-
-  type: "object",
-
-  properties: {
-
-    uiSchema: {
-
-      type: "object",
-
-      properties: {
-
-        pages: {
-
-          type: "array",
-
-          items: {
-
-            type: "object",
-
-            properties: {
-
-              name: {
-                type: "string",
-              },
-
-              route: {
-                type: "string",
-              },
-
-              layout: {
-                type: "string",
-              },
-
-              components: {
-
-                type: "array",
-
-                items: {
-
-                  type: "object",
-
-                  properties: {
-
-                    type: {
-                      type: "string",
-                    },
-
-                    properties: {
-                      type: "object",
-                    },
-
-                  },
-
-                  required: [
-                    "type",
-                  ],
-
-                },
-
-              },
-
-            },
-
-            required: [
-
-              "name",
-
-              "route",
-
-              "layout",
-
-              "components",
-
-            ],
-
-          },
-
-        },
-
+  "apiSchema": {
+    "endpoints": [
+      {
+        "path": "/api/users",
+        "method": "GET"
       },
-
-      required: [
-        "pages",
-      ],
-
-    },
-
-    apiSchema: {
-
-      type: "object",
-
-      properties: {
-
-        endpoints: {
-
-          type: "array",
-
-          items: {
-
-            type: "object",
-
-            properties: {
-
-              path: {
-                type: "string",
-              },
-
-              method: {
-                type: "string",
-              },
-
-            },
-
-          },
-
-        },
-
-      },
-
-    },
-
-    databaseSchema: {
-
-      type: "object",
-
-      properties: {
-
-        tables: {
-
-          type: "array",
-
-          items: {
-
-            type: "object",
-
-            properties: {
-
-              name: {
-                type: "string",
-              },
-
-              columns: {
-
-                type: "array",
-
-                items: {
-
-                  type: "object",
-
-                  properties: {
-
-                    name: {
-                      type: "string",
-                    },
-
-                    type: {
-                      type: "string",
-                    },
-
-                  },
-
-                },
-
-              },
-
-            },
-
-          },
-
-        },
-
-      },
-
-    },
-
+      {
+        "path": "/api/users",
+        "method": "POST"
+      }
+    ]
   },
 
-  required: [
+  "databaseSchema": {
+    "tables": [
+      {
+        "name": "users",
+        "columns": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          }
+        ]
+      }
+    ]
+  },
 
-    "uiSchema",
+  "authSystem": {
+    "enabled": true,
+    "roles": [
+      "Admin",
+      "User"
+    ]
+  }
+}
 
-    "apiSchema",
+Rules:
+- Return ONLY valid JSON
+- No markdown
+- No explanations
+- No comments
+- All routes must start with /
+- Components must contain type
+- Use lightweight schema design
 
-    "databaseSchema",
+`;
 
-  ],
-
-};
+}

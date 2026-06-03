@@ -52,10 +52,16 @@ export async function POST(
     // COMPILE APP
     // =========================
 
-    const compiledData =
-      await compileApplication(
-        prompt
-      );
+   const compiledData =
+  await compileApplication({
+
+    prompt,
+
+    existingRuntime: null,
+
+    mode: "generate",
+
+  });
 
     // =========================
     // SUCCESS
