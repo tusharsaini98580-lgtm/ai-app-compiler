@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse }
+  from "next/server";
 
 import {
   compileApplication,
@@ -20,57 +21,65 @@ export async function POST(
       await req.json();
 
     const prompt =
-      body?.prompt;
+      body?.prompt || "";
 
     // =========================
     // VALIDATION
     // =========================
 
     if (
-      !prompt ||
 
       typeof prompt !==
         "string" ||
 
       prompt.trim().length < 3
+
     ) {
 
       return NextResponse.json(
+
         {
           success: false,
 
           error:
             "Please enter a valid prompt.",
         },
+
         {
           status: 400,
         }
+
       );
+
     }
 
     // =========================
-    // COMPILE APP
+    // COMPILE APPLICATION
     // =========================
 
-   const compiledData =
-  await compileApplication({
+    const compiledData =
+      await compileApplication({
 
-    prompt,
+        prompt,
 
-    existingRuntime: null,
+        existingRuntime:
+          null,
 
-    mode: "generate",
+        mode:
+          "generate",
 
-  });
+      });
 
     // =========================
-    // SUCCESS
+    // RESPONSE
     // =========================
 
     return NextResponse.json({
+
       success: true,
 
       ...compiledData,
+
     });
 
   } catch (error: any) {
@@ -81,6 +90,7 @@ export async function POST(
     );
 
     return NextResponse.json(
+
       {
         success: false,
 
@@ -88,9 +98,13 @@ export async function POST(
           error?.message ||
           "Failed to compile application.",
       },
+
       {
         status: 500,
       }
+
     );
+
   }
+
 }
