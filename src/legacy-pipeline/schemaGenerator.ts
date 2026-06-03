@@ -1,4 +1,5 @@
-import { geminiModel } from "../lib/gemini";
+import { groqModel }
+  from "../lib/gemini";
 
 function cleanJSON(
   text: string
@@ -8,6 +9,7 @@ function cleanJSON(
     .replace(/```json/g, "")
     .replace(/```/g, "")
     .trim();
+
 }
 
 export async function schemaGenerator(
@@ -93,7 +95,7 @@ Rules:
 `;
 
     const result =
-      await geminiModel.generateContent(
+      await groqModel.generateContent(
         prompt
       );
 
@@ -131,6 +133,7 @@ Rules:
           enabled: false,
           roles: [],
         },
+
     };
 
   } catch (error) {
@@ -143,6 +146,7 @@ Rules:
     return {
 
       uiSchema: {
+
         pages: [
           {
             name:
@@ -161,6 +165,7 @@ Rules:
             ],
           },
         ],
+
       },
 
       apiSchema: {
@@ -172,12 +177,18 @@ Rules:
       },
 
       authSystem: {
+
         enabled: false,
+
         roles: [
           "Admin",
           "User",
         ],
+
       },
+
     };
+
   }
+
 }

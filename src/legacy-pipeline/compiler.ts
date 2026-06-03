@@ -14,9 +14,20 @@ import {
   repairSchema,
 } from "./repairEngine";
 
-export async function compileApplication(
-  userPrompt: string
-) {
+import {
+  generateWorkflowStub,
+  validateWorkflowIntegrations,
+} from "../lib/workflow-generator";
+
+export async function compileApplication({
+  prompt,
+  existingRuntime,
+  mode,
+}: {
+  prompt: string;
+  existingRuntime?: any;
+  mode?: string;
+}) {
 
   try {
 
@@ -31,7 +42,7 @@ export async function compileApplication(
 
     const intent =
       await extractIntent(
-        userPrompt
+        prompt
       );
 
     // =========================
@@ -71,14 +82,24 @@ export async function compileApplication(
       "Repairing schema..."
     );
 
-    const repaired =
-      repairSchema(
-        rawSchema
-      );
+   const workflows =
+  generateWorkflowStub(
+    prompt
+  );
+
+const workflowErrors =
+  validateWorkflowIntegrations(
+    workflows
+  );
 
     // =========================
     // SAFE EXTRACTION
     // =========================
+    const repaired =
+  repairSchema(
+    rawSchema
+  );
+
 
     const uiSchema =
 
@@ -131,11 +152,17 @@ export async function compileApplication(
 
       uiSchema.pages = [
 
-        {
-          name:
-            "Dashboard",
+       {
+  name:
+    "Dashboard",
 
-          components: [
+  route:
+    "/dashboard",
+
+  layout:
+    "grid",
+
+  components: [
 
             {
               type:
@@ -143,7 +170,7 @@ export async function compileApplication(
 
               properties: {
                 text:
-                  `Generated app for: ${userPrompt}`,
+                  `Generated app for: ${prompt}`,
               },
             },
 
@@ -191,6 +218,11 @@ export async function compileApplication(
       databaseSchema,
 
       authSystem,
+
+      workflows,
+
+workflowErrors,
+
     };
 
   } catch (error) {
@@ -211,10 +243,16 @@ export async function compileApplication(
         pages: [
 
           {
-            name:
-              "Dashboard",
+  name:
+    "Dashboard",
 
-            components: [
+  route:
+    "/dashboard",
+
+  layout:
+    "grid",
+
+  components: [
 
               {
                 type:

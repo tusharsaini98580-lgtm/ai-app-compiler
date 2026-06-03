@@ -5,11 +5,13 @@ export const SYSTEM_DESIGN_SCHEMA = {
   properties: {
 
     roles: {
+
       type: "array",
 
       items: {
         type: "string",
       },
+
     },
 
     entities: {
@@ -33,21 +35,27 @@ export const SYSTEM_DESIGN_SCHEMA = {
             items: {
               type: "string",
             },
+
           },
+
         },
 
         required: [
           "name",
           "fields",
         ],
+
       },
+
     },
+
   },
 
   required: [
     "roles",
     "entities",
   ],
+
 };
 
 export const FINAL_COMPILER_SCHEMA = {
@@ -76,6 +84,14 @@ export const FINAL_COMPILER_SCHEMA = {
                 type: "string",
               },
 
+              route: {
+                type: "string",
+              },
+
+              layout: {
+                type: "string",
+              },
+
               components: {
 
                 type: "array",
@@ -93,26 +109,41 @@ export const FINAL_COMPILER_SCHEMA = {
                     properties: {
                       type: "object",
                     },
+
                   },
 
                   required: [
                     "type",
                   ],
+
                 },
+
               },
+
             },
 
             required: [
+
               "name",
+
+              "route",
+
+              "layout",
+
               "components",
+
             ],
+
           },
+
         },
+
       },
 
       required: [
         "pages",
       ],
+
     },
 
     apiSchema: {
@@ -138,10 +169,15 @@ export const FINAL_COMPILER_SCHEMA = {
               method: {
                 type: "string",
               },
+
             },
+
           },
+
         },
+
       },
+
     },
 
     databaseSchema: {
@@ -181,19 +217,33 @@ export const FINAL_COMPILER_SCHEMA = {
                     type: {
                       type: "string",
                     },
+
                   },
+
                 },
+
               },
+
             },
+
           },
+
         },
+
       },
+
     },
+
   },
 
   required: [
+
     "uiSchema",
+
     "apiSchema",
+
     "databaseSchema",
+
   ],
+
 };

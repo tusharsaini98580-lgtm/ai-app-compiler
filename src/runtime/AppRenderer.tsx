@@ -198,7 +198,7 @@ export default function AppRenderer({
                           key={fieldIndex}
                           className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-sm"
                         >
-                          {field}
+                          {field.name} ({field.type})
                         </div>
                       )
                     )}

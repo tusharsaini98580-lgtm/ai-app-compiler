@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import {
   compileApplication,
-} from "../../../pipeline/compiler";
+} from "../../../legacy-pipeline/compiler";
 
 export const dynamic =
   "force-dynamic";

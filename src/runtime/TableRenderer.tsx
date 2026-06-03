@@ -48,9 +48,13 @@ export default function TableRenderer({
                         key={colIndex}
                         className="px-5 py-4 text-slate-300"
                       >
-                        {row?.[
-                          column
-                        ] || "-"}
+                        {typeof row?.[column] === "object"
+  ? JSON.stringify(
+      row?.[column],
+      null,
+      2
+    )
+  : row?.[column] || "-"}
                       </td>
                     )
                   )}

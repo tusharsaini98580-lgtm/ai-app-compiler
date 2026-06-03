@@ -1,4 +1,5 @@
-import { geminiModel } from "../lib/gemini";
+import { groqModel }
+  from "../lib/gemini";
 
 function cleanJSON(
   text: string
@@ -67,7 +68,7 @@ Return ONLY pure JSON.
 `;
 
     const result =
-      await geminiModel.generateContent(
+      await groqModel.generateContent(
         prompt
       );
 

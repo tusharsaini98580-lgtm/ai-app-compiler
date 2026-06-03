@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 
 import {
-  geminiModel,
+  groqModel,
 } from "../../../lib/gemini";
 
 // =========================
@@ -116,7 +116,7 @@ ${prompt}
     // =========================
 
     const result =
-      await geminiModel.generateContent(
+      await groqModel.generateContent(
         promptText
       );
 

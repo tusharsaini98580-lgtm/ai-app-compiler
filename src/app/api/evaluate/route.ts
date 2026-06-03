@@ -1,159 +1,134 @@
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+import {
+  compileApplication,
+} from "../../../legacy-pipeline/compiler";
+
+export async function POST(
+  req: Request
+) {
   try {
-    const body = await req.json();
-    const prompt = body.prompt;
 
-    if (!prompt) {
-      return NextResponse.json(
-        { error: "Prompt is required" },
-        { status: 400 }
-      );
-    }
+    const body =
+      await req.json();
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
+    // =========================
+    // REQUEST DATA
+    // =========================
 
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "http://localhost:3000",
-          "X-Title": "RuntimeOS",
-        },
+    const prompt =
+      body.prompt || "";
 
-        body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
+    const existingRuntime =
+      body.existingRuntime || null;
 
-          temperature: 0.7,
+    const mode =
+      body.mode || "generate";
 
-          max_tokens: 2500,
+    // =========================
+    // INTENT
+    // =========================
 
-          messages: [
-            {
-              role: "system",
+    const intent = {
+      appName: "AI RuntimeOS",
 
-              content: `
-You are an elite AI SaaS compiler.
+      appType:
+        "Enterprise SaaS",
 
-You generate REAL enterprise applications.
+      features: [
+        "Authentication",
+        "Dashboard",
+        "Analytics",
+        "Workflow Automation",
+      ],
+    };
 
-You ONLY return valid JSON.
+    // =========================
+    // COMPILE APPLICATION
+    // =========================
 
-Never return markdown.
-Never return explanations.
-Never return triple backticks.
+   const compiled =
+  await compileApplication({
 
-Generate realistic:
-- CRM systems
-- SaaS dashboards
-- ERP systems
-- Hospital systems
-- School systems
-- HR platforms
-- Analytics dashboards
+    prompt,
 
-The JSX must be REAL React + Tailwind UI.
-`,
-            },
+    existingRuntime,
 
-            {
-              role: "user",
+    mode,
 
-              content: `
-Build a production-ready SaaS app for:
+  });
 
-"${prompt}"
+    // =========================
+    // RESPONSE
+    // =========================
 
-Return ONLY valid JSON in this EXACT structure:
+    return NextResponse.json({
 
-{
-  "title": "",
-  "description": "",
-  "features": [],
-  "pages": [
-    {
-      "name": "",
-      "route": "",
-      "description": ""
-    }
-  ],
-  "databaseTables": [],
-  "apiRoutes": [],
-  "components": [],
-  "jsx": ""
-}
+      success: true,
 
-Rules:
+      intent,
 
-- title should be realistic
-- pages must be real SaaS pages
-- databaseTables must be production-grade
-- apiRoutes must be REST API routes
-- features must be enterprise-level
-- jsx must contain REAL React + Tailwind dashboard UI
-- jsx must NOT contain markdown
-- jsx must NOT contain triple backticks
-`,
-            },
-          ],
-        }),
-      }
-    );
+      ...compiled,
 
-    if (!response.ok) {
-      const errorText = await response.text();
+      generatedCode: {
 
-      console.error("OPENROUTER ERROR:", errorText);
+        frontend:
+`export default function Dashboard() {
+  return (
+    <main className="p-10">
+      <h1>AI Runtime Dashboard</h1>
+    </main>
+  );
+}`,
 
-      return NextResponse.json(
-        {
-          error: "OpenRouter request failed",
-          details: errorText,
-        },
-        { status: 500 }
-      );
-    }
+        backend:
+`app.post("/api/runtime", async (req, res) => {
+  res.json({ success: true });
+});`,
 
-    const data = await response.json();
+        database:
+`model User {
+  id String @id
+  email String
+}`,
 
-    const rawContent =
-      data?.choices?.[0]?.message?.content || "{}";
+        appspec:
+JSON.stringify(
+  compiled,
+  null,
+  2
+),
 
-    const cleanedContent = rawContent
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+      },
 
-    let parsed;
+      deployment: {
 
-    try {
-      parsed = JSON.parse(cleanedContent);
-    } catch (parseError) {
-      console.error("JSON PARSE ERROR:", parseError);
+        status: "ready",
 
-      return NextResponse.json(
-        {
-          error: "Invalid AI JSON response",
-          raw: cleanedContent,
-        },
-        { status: 500 }
-      );
-    }
+        provider: "vercel",
 
-    return NextResponse.json(parsed);
+      },
+
+    });
 
   } catch (error: any) {
-    console.error("SERVER ERROR:", error);
+
+    console.error(error);
 
     return NextResponse.json(
+
       {
-        error: "Runtime generation failed",
-        details: error.message,
+        success: false,
+
+        error:
+          error?.message ||
+          "Internal server error",
       },
-      { status: 500 }
+
+      {
+        status: 500,
+      }
+
     );
   }
 }
